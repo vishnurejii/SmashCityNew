@@ -1,0 +1,1 @@
+# SmashCity Backend Configuration
