@@ -2,8 +2,24 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
+
+def api_root_view(request):
+    return JsonResponse({
+        'status': 'online',
+        'service': 'SmashCity Backend API',
+        'version': '1.0.0',
+        'message': 'SmashCity REST API is up and running successfully!',
+        'endpoints': {
+            'menu': '/api/menu/products/',
+            'orders': '/api/orders/',
+            'delivery': '/api/delivery/orders/',
+            'admin': '/admin/',
+        }
+    })
 
 urlpatterns = [
+    path('', api_root_view, name='api-root'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('accounts.urls')),
     path('api/menu/', include('menu.urls')),
