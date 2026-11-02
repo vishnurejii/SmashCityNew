@@ -21,12 +21,22 @@ def api_root_view(request):
 urlpatterns = [
     path('', api_root_view, name='api-root'),
     path('admin/', admin.site.urls),
+
+    # Standard API endpoints (with /api/ prefix)
     path('api/auth/', include('accounts.urls')),
     path('api/menu/', include('menu.urls')),
     path('api/cart/', include('cart.urls')),
     path('api/orders/', include('orders.urls')),
     path('api/payments/', include('payments.urls')),
     path('api/delivery/', include('delivery.urls')),
+
+    # Direct fallback endpoints (in case frontend calls without /api)
+    path('auth/', include('accounts.urls')),
+    path('menu/', include('menu.urls')),
+    path('cart/', include('cart.urls')),
+    path('orders/', include('orders.urls')),
+    path('payments/', include('payments.urls')),
+    path('delivery/', include('delivery.urls')),
 ]
 
 if settings.DEBUG:

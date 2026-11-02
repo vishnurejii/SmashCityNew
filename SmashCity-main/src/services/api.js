@@ -1,8 +1,20 @@
 const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  let url = (import.meta.env.VITE_API_URL || '').trim();
+  if (url) {
+    // Strip trailing slashes
+    url = url.replace(/\/+$/, '');
+    // If user forgot to add '/api' at the end, append it automatically!
+    if (!url.endsWith('/api')) {
+      url = `${url}/api`;
+    }
+    return url;
+  }
   if (typeof window !== 'undefined' && window.location) {
     const host = window.location.hostname || '127.0.0.1';
-    return `http://${host}:8000/api`;
+    // If accessed on localhost or IP
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return `http://${host}:8000/api`;
+    }
   }
   return 'http://127.0.0.1:8000/api';
 };
@@ -23,7 +35,10 @@ export async function apiRequest(endpoint, options = {}) {
     ...options.headers,
   };
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const targetUrl = `${API_BASE_URL}${cleanEndpoint}`;
+
+  const response = await fetch(targetUrl, {
     ...options,
     headers,
   });
@@ -38,7 +53,9 @@ export async function apiRequest(endpoint, options = {}) {
       if (data.error) errorMsg = data.error;
       else if (data.detail) errorMsg = data.detail;
       else if (data.message) errorMsg = data.message;
-      else {
+      else if (data.non_field_errors) {
+        errorMsg = Array.isArray(data.non_field_errors) ? data.non_field_errors.join(', ') : data.non_field_errors;
+      } else {
         // Collect field errors
         const messages = [];
         for (const [key, val] of Object.entries(data)) {
@@ -47,7 +64,11 @@ export async function apiRequest(endpoint, options = {}) {
         errorMsg = messages.join(' | ') || errorMsg;
       }
     } else if (typeof data === 'string') {
-      errorMsg = data;
+      if (data.includes('<!doctype') || data.includes('<html') || data.includes('<title>Not Found</title>')) {
+        errorMsg = `Backend endpoint not found (${response.status}). Please check VITE_API_URL or backend URL.`;
+      } else {
+        errorMsg = data;
+      }
     }
     const error = new Error(errorMsg);
     error.status = response.status;
