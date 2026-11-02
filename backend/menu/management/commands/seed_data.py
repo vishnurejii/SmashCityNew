@@ -19,6 +19,26 @@ class Command(BaseCommand):
         else:
             self.stdout.write("Superuser 'admin' already exists.")
 
+        # 1b. Delivery Rider
+        rider_user, created = User.objects.get_or_create(
+            username='rider',
+            defaults={
+                'email': 'rider@smashcity.com',
+                'first_name': 'Alex',
+                'last_name': 'Swift',
+                'is_staff': False,
+                'is_superuser': False,
+            }
+        )
+        rider_user.set_password('rider123')
+        rider_user.save()
+        UserProfile.objects.get_or_create(user=rider_user, defaults={'phone_number': '+1 555-8391'})
+        if created:
+            self.stdout.write(self.style.SUCCESS("Delivery rider created: username 'rider', password 'rider123'"))
+        else:
+            self.stdout.write("Delivery rider 'rider' verified/reset with password 'rider123'.")
+
+
         # 2. Categories
         categories_data = [
             {'name': 'Burgers', 'display_order': 1, 'description': 'Signature smashed patties with crispy lace edges.'},
