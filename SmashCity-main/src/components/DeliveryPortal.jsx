@@ -16,8 +16,14 @@ import {
   Shield,
   User,
   X,
-  ChevronRight
+  ChevronRight,
+  QrCode,
+  Camera,
+  Zap,
+  Sparkles,
+  Check
 } from 'lucide-react';
+import { Html5Qrcode } from 'html5-qrcode';
 import { deliveryApi, ordersApi } from '../services/api';
 
 const DeliveryPortal = ({ onNavigate }) => {
@@ -41,6 +47,165 @@ const DeliveryPortal = ({ onNavigate }) => {
 
   // Action loading state per order
   const [processingOrderId, setProcessingOrderId] = useState(null);
+
+  // QR Scanner Modal state
+  const [isScanModalOpen, setIsScanModalOpen] = useState(false);
+  const [scannerLoading, setScannerLoading] = useState(false);
+  const [scanError, setScanError] = useState('');
+  const [scanSuccessMessage, setScanSuccessMessage] = useState('');
+  const [manualOrderNumber, setManualOrderNumber] = useState('');
+  const [isClaimingScanned, setIsClaimingScanned] = useState(false);
+  const [cameraActive, setCameraActive] = useState(false);
+  const scannerInstanceRef = useRef(null);
+
+  // Audio chime feedback for scanner
+  const playScanChime = () => {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+      osc.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.14); // A6
+      gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.18);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.18);
+    } catch (e) {
+      // AudioContext could be blocked if not initiated by gesture
+    }
+  };
+
+  // Process and claim an order from scanned QR or manual input
+  const processClaimOrder = async (rawInput) => {
+    if (!rawInput || isClaimingScanned) return;
+    let targetOrderNumber = String(rawInput).trim();
+
+    // Parse JSON if encoded as structured payload
+    if (targetOrderNumber.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(targetOrderNumber);
+        if (parsed.order_number) {
+          targetOrderNumber = parsed.order_number;
+        }
+      } catch (e) {
+        // Fallback to regex
+      }
+    }
+
+    // Extract SC-... pattern
+    const match = targetOrderNumber.match(/SC-[A-Za-z0-9-]+/i);
+    if (match) {
+      targetOrderNumber = match[0].toUpperCase();
+    }
+
+    setIsClaimingScanned(true);
+    setScanError('');
+    setScanSuccessMessage('');
+
+    try {
+      playScanChime();
+      const res = await deliveryApi.pickupOrder(targetOrderNumber, {
+        rider_name: riderName,
+        rider_phone: riderPhone,
+      });
+
+      setScanSuccessMessage(res.message || `Order ${targetOrderNumber} claimed successfully!`);
+      
+      // Stop scanner if running
+      if (scannerInstanceRef.current && scannerInstanceRef.current.isScanning) {
+        scannerInstanceRef.current.stop().catch(console.error);
+      }
+
+      // Refresh orders in background
+      await fetchOrders(true);
+
+      // Auto-switch to active orders view
+      setActiveTab('active');
+
+      // Close modal after a short celebration
+      setTimeout(() => {
+        setIsScanModalOpen(false);
+        setScanSuccessMessage('');
+        setIsClaimingScanned(false);
+      }, 1500);
+    } catch (err) {
+      setScanError(err.message || `Failed to claim order ${targetOrderNumber}`);
+      setIsClaimingScanned(false);
+    }
+  };
+
+  // Camera scanner lifecycle
+  useEffect(() => {
+    if (!isScanModalOpen) {
+      setCameraActive(false);
+      setScannerLoading(false);
+      setScanError('');
+      setScanSuccessMessage('');
+      if (scannerInstanceRef.current) {
+        if (scannerInstanceRef.current.isScanning) {
+          scannerInstanceRef.current.stop().then(() => scannerInstanceRef.current.clear()).catch(console.error);
+        } else {
+          scannerInstanceRef.current.clear().catch(console.error);
+        }
+        scannerInstanceRef.current = null;
+      }
+      return;
+    }
+
+    let isMounted = true;
+    const timer = setTimeout(async () => {
+      try {
+        setScannerLoading(true);
+        setScanError('');
+        const html5QrCode = new Html5Qrcode('qr-reader-viewport');
+        scannerInstanceRef.current = html5QrCode;
+
+        const config = {
+          fps: 10,
+          qrbox: { width: 220, height: 220 },
+          aspectRatio: 1.0,
+        };
+
+        await html5QrCode.start(
+          { facingMode: 'environment' },
+          config,
+          (decodedText) => {
+            if (isMounted) {
+              processClaimOrder(decodedText);
+            }
+          },
+          () => {} // suppress frame parse noise
+        );
+
+        if (isMounted) {
+          setCameraActive(true);
+          setScannerLoading(false);
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.warn('QR Camera initialization warning:', err);
+          setCameraActive(false);
+          setScannerLoading(false);
+        }
+      }
+    }, 250);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+      if (scannerInstanceRef.current) {
+        if (scannerInstanceRef.current.isScanning) {
+          scannerInstanceRef.current.stop().then(() => scannerInstanceRef.current.clear()).catch(console.error);
+        } else {
+          scannerInstanceRef.current.clear().catch(console.error);
+        }
+        scannerInstanceRef.current = null;
+      }
+    };
+  }, [isScanModalOpen]);
 
   const fetchOrders = async (isBackground = false) => {
     if (!isBackground) setLoading(true);
@@ -71,21 +236,7 @@ const DeliveryPortal = ({ onNavigate }) => {
     setIsEditingProfile(false);
   };
 
-  // Accept / Pick Up Order
-  const handlePickupOrder = async (order) => {
-    setProcessingOrderId(order.order_number);
-    try {
-      await deliveryApi.pickupOrder(order.order_number, {
-        rider_name: riderName,
-        rider_phone: riderPhone,
-      });
-      await fetchOrders(true);
-    } catch (err) {
-      alert(err.message || 'Failed to accept order for delivery');
-    } finally {
-      setProcessingOrderId(null);
-    }
-  };
+
 
   // Open OTP Modal for an Out for Delivery order
   const openOtpModal = (order) => {
@@ -204,6 +355,16 @@ const DeliveryPortal = ({ onNavigate }) => {
               </div>
             </button>
 
+            {/* Scan Dispatch QR Header Button */}
+            <button
+              onClick={() => setIsScanModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent text-black hover:bg-white text-xs font-chunky tracking-wider transition-all shadow-md shadow-accent/20 cursor-pointer hover:scale-105 active:scale-95"
+              title="Scan QR code on Admin screen to pick up order"
+            >
+              <Camera className="w-4 h-4 text-black" />
+              <span className="hidden sm:inline">Scan Order QR</span>
+            </button>
+
             {/* Storefront Link */}
             <button
               onClick={() => onNavigate('store')}
@@ -257,6 +418,36 @@ const DeliveryPortal = ({ onNavigate }) => {
       {/* Main Delivery View */}
       <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 space-y-6">
         
+        {/* Instant QR Dispatch Counter Hero Banner */}
+        <section className="bg-gradient-to-r from-accent/20 via-[#181818] to-[#121212] border-2 border-accent/40 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl shadow-accent/10">
+          <div className="flex items-center gap-3.5 text-left w-full sm:w-auto">
+            <div className="w-12 h-12 rounded-2xl bg-accent text-black flex items-center justify-center font-black shadow-lg shadow-accent/25 shrink-0">
+              <QrCode className="w-7 h-7" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-chunky text-base sm:text-lg text-white tracking-wide">
+                  Order Pickup Counter
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-accent/20 border border-accent/40 text-[10px] font-black uppercase tracking-wider text-accent">
+                  QR Auto-Assign
+                </span>
+              </div>
+              <p className="text-xs text-gray-300 mt-0.5">
+                Scan the QR code on the Admin screen to instantly assign & claim your order to your page.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setIsScanModalOpen(true)}
+            className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-accent hover:bg-white text-black font-chunky text-sm tracking-wider uppercase transition-all shadow-xl shadow-accent/25 flex items-center justify-center gap-2.5 cursor-pointer hover:scale-105 active:scale-95 shrink-0"
+          >
+            <Camera className="w-5 h-5 text-black" />
+            <span>Scan QR to Pick Up</span>
+          </button>
+        </section>
+
         {/* Rider KPI Summary */}
         <section className="grid grid-cols-3 gap-3">
           <div className="bg-[#141414] border border-[#242424] rounded-2xl p-4 text-center">
@@ -517,12 +708,11 @@ const DeliveryPortal = ({ onNavigate }) => {
                     <div>
                       {isReadyForPickup && (
                         <button
-                          onClick={() => handlePickupOrder(order)}
-                          disabled={isProcessing}
-                          className="w-full sm:w-auto px-6 py-3 bg-accent hover:bg-white text-black font-chunky text-base tracking-wider rounded-xl transition-all shadow-lg shadow-accent/20 flex items-center justify-center gap-2 cursor-pointer"
+                          onClick={() => setIsScanModalOpen(true)}
+                          className="w-full sm:w-auto px-6 py-3 bg-accent hover:bg-white text-black font-chunky text-base tracking-wider rounded-xl transition-all shadow-lg shadow-accent/20 flex items-center justify-center gap-2.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
                         >
-                          <Bike className="w-5 h-5" />
-                          {isProcessing ? 'Claiming Order...' : 'Accept & Start Delivery'}
+                          <Camera className="w-5 h-5 text-black" />
+                          <span>Scan QR to Pick Up</span>
                         </button>
                       )}
 
@@ -642,6 +832,174 @@ const DeliveryPortal = ({ onNavigate }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* QR Scanner & Order Claim Modal */}
+      {isScanModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in overflow-y-auto">
+          <div className="w-full max-w-lg bg-[#141414] border-2 border-border rounded-3xl p-6 sm:p-7 shadow-2xl text-white relative space-y-5 my-6 max-h-[92vh] overflow-y-auto">
+            
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setIsScanModalOpen(false);
+                setScanError('');
+                setScanSuccessMessage('');
+              }}
+              className="absolute top-5 right-5 text-gray-400 hover:text-white p-1 rounded-lg hover:bg-[#222] transition-colors cursor-pointer"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Modal Header */}
+            <div className="flex items-center gap-3 pb-3 border-b border-[#242424]">
+              <div className="w-11 h-11 rounded-2xl bg-accent text-black font-black flex items-center justify-center shadow-lg shadow-accent/25 shrink-0">
+                <Camera className="w-6 h-6" />
+              </div>
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-accent bg-accent/10 px-2 py-0.5 rounded border border-accent/20">
+                  Instant Dispatch
+                </span>
+                <h3 className="font-chunky text-xl text-white tracking-wide mt-0.5">
+                  Scan Admin Pickup QR
+                </h3>
+              </div>
+            </div>
+
+            {/* Rider profile badge */}
+            <div className="flex items-center justify-between bg-[#0e0e0e] px-3.5 py-2 rounded-xl border border-[#242424] text-xs">
+              <span className="text-gray-400">Claiming as:</span>
+              <span className="font-bold text-accent font-mono flex items-center gap-1.5">
+                <Bike className="w-3.5 h-3.5" />
+                {riderName} ({riderPhone})
+              </span>
+            </div>
+
+            {/* Success Celebration Banner */}
+            {scanSuccessMessage && (
+              <div className="p-4 bg-green-950/80 border-2 border-green-500 rounded-2xl flex items-center gap-3.5 animate-in zoom-in-95">
+                <div className="w-10 h-10 rounded-xl bg-green-500 text-black flex items-center justify-center shrink-0 font-bold">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-green-200">
+                    {scanSuccessMessage}
+                  </p>
+                  <p className="text-xs text-green-400/80 mt-0.5">
+                    Order details updating to your active route...
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Error Banner */}
+            {scanError && (
+              <div className="p-3.5 bg-red-950/60 border border-red-500/50 rounded-2xl flex items-center gap-3 text-xs text-red-300">
+                <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
+                <span>{scanError}</span>
+              </div>
+            )}
+
+            {/* Camera Viewport Container */}
+            <div className="relative rounded-2xl overflow-hidden bg-black border-2 border-[#2b2b2b] min-h-[260px] flex flex-col items-center justify-center">
+              {/* html5-qrcode mounts video here */}
+              <div id="qr-reader-viewport" className="w-full max-w-[340px] overflow-hidden" />
+
+              {/* Viewfinder Overlay Crosshairs & Animated Laser */}
+              {cameraActive && !scanSuccessMessage && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <div className="w-52 h-52 border-2 border-dashed border-accent/80 rounded-2xl relative">
+                    <span className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-accent" />
+                    <span className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-accent" />
+                    <span className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-accent" />
+                    <span className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-accent" />
+                    
+                    {/* Pulsing red/amber laser scanning line */}
+                    <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-accent to-transparent absolute top-1/2 -translate-y-1/2 animate-pulse shadow-lg shadow-accent" />
+                  </div>
+                </div>
+              )}
+
+              {/* Camera loading state */}
+              {scannerLoading && (
+                <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center gap-2 text-xs text-gray-400">
+                  <RefreshCw className="w-6 h-6 animate-spin text-accent" />
+                  <span>Activating device camera...</span>
+                </div>
+              )}
+
+              {/* If camera not active & not loading */}
+              {!cameraActive && !scannerLoading && (
+                <div className="p-6 text-center text-xs text-gray-400 space-y-2">
+                  <Camera className="w-8 h-8 mx-auto text-gray-600" />
+                  <p>Point your mobile camera at the Admin QR screen, or use the quick simulation options below.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Simulation / Test Scan Section */}
+            <div className="bg-[#0e0e0e] p-3.5 rounded-2xl border border-[#222] space-y-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-gray-300 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                  <Zap className="w-3.5 h-3.5 text-accent" />
+                  Quick Test / Simulate Scan:
+                </span>
+                <span className="text-[10px] text-gray-500">1-click test</span>
+              </div>
+
+              {orders.filter((o) => ['READY_FOR_PICKUP', 'PREPARING', 'ORDER_CONFIRMED', 'ORDER_PLACED'].includes(o.status)).length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {orders
+                    .filter((o) => ['READY_FOR_PICKUP', 'PREPARING', 'ORDER_CONFIRMED', 'ORDER_PLACED'].includes(o.status))
+                    .slice(0, 5)
+                    .map((o) => (
+                      <button
+                        key={o.order_number}
+                        type="button"
+                        disabled={isClaimingScanned}
+                        onClick={() => processClaimOrder(o.order_number)}
+                        className="px-3 py-1.5 bg-[#1a1a1a] hover:bg-accent hover:text-black border border-[#333] hover:border-accent rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      >
+                        <QrCode className="w-3.5 h-3.5 text-accent" />
+                        <span>{o.order_number}</span>
+                        <span className="text-[10px] opacity-75 font-sans">${o.total_amount}</span>
+                      </button>
+                    ))}
+                </div>
+              ) : (
+                <p className="text-[11px] text-gray-500">No active kitchen orders available to claim right now.</p>
+              )}
+
+              {/* Manual Order Number Input */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (manualOrderNumber.trim()) {
+                    processClaimOrder(manualOrderNumber.trim());
+                    setManualOrderNumber('');
+                  }
+                }}
+                className="flex items-center gap-2 pt-1"
+              >
+                <input
+                  type="text"
+                  placeholder="Or enter Order # (e.g. SC-...)"
+                  value={manualOrderNumber}
+                  onChange={(e) => setManualOrderNumber(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-[#161616] border border-[#2a2a2a] rounded-xl text-xs text-white font-mono placeholder-gray-500 focus:outline-none focus:border-accent"
+                />
+                <button
+                  type="submit"
+                  disabled={!manualOrderNumber.trim() || isClaimingScanned}
+                  className="px-4 py-2 bg-[#222] hover:bg-accent hover:text-black text-gray-200 text-xs font-bold uppercase rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {isClaimingScanned ? 'Claiming...' : 'Claim'}
+                </button>
+              </form>
+            </div>
+
           </div>
         </div>
       )}

@@ -166,7 +166,7 @@ class VerifyDeliveryOtpView(APIView):
 
 class DeliveryPartnerPickupView(APIView):
     """
-    Allows delivery partner to accept/pick up order and begin transit
+    Allows delivery partner to accept/pick up order and begin transit (via QR code scan or manual accept)
     """
     permission_classes = [permissions.AllowAny]
 
@@ -177,9 +177,24 @@ class DeliveryPartnerPickupView(APIView):
 
         if order.status in [Order.STATUS_DELIVERED, Order.STATUS_CANCELLED]:
             return Response(
-                {'error': f"Cannot pick up an order with status '{order.get_status_display()}'."},
+                {'error': f"Cannot pick up order {order.order_number} because it is already '{order.get_status_display()}'."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        # Concurrency / Double-pickup protection: Check if already picked up by another rider
+        if order.status == Order.STATUS_OUT_FOR_DELIVERY and order.assigned_delivery_partner:
+            if order.assigned_delivery_partner.lower() != rider_name.lower():
+                return Response(
+                    {'error': f"Order {order.order_number} has already been claimed by {order.assigned_delivery_partner}."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                return Response({
+                    'success': True,
+                    'already_assigned': True,
+                    'message': f"Order {order.order_number} is already assigned to you! Delivery details loaded.",
+                    'order': OrderSerializer(order).data
+                })
 
         order.status = Order.STATUS_OUT_FOR_DELIVERY
         order.assigned_delivery_partner = rider_name
@@ -189,12 +204,12 @@ class DeliveryPartnerPickupView(APIView):
 
         order.add_status_history(
             Order.STATUS_OUT_FOR_DELIVERY,
-            note=f"Order picked up by {rider_name} and is out for delivery."
+            note=f"Order scanned & picked up by {rider_name} (Out for Delivery)."
         )
 
         return Response({
             'success': True,
-            'message': f"Order {order.order_number} is now Out for Delivery.",
+            'message': f"Order {order.order_number} claimed successfully by {rider_name}! Out for Delivery.",
             'order': OrderSerializer(order).data
         })
 

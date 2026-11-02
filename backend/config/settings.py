@@ -16,11 +16,15 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'smashcity-default-insecure-key-2026')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 't')
 
-ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver,.koyeb.app').split(',') if host.strip()]
+ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver,.koyeb.app,.onrender.com,.railway.app').split(',') if host.strip()]
 if 'testserver' not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append('testserver')
 if '.koyeb.app' not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append('.koyeb.app')
+if '.onrender.com' not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append('.onrender.com')
+if '.railway.app' not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append('.railway.app')
 
 # Application definition
 INSTALLED_APPS = [
@@ -174,9 +178,11 @@ if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-# CSRF Trusted Origins (for Koyeb and Vercel domains)
+# CSRF Trusted Origins (for Koyeb, Render, Railway, and Vercel domains)
 CSRF_TRUSTED_ORIGINS = [
     'https://*.koyeb.app',
+    'https://*.onrender.com',
+    'https://*.railway.app',
     'https://*.vercel.app',
     'http://localhost:5173',
     'http://127.0.0.1:5173',

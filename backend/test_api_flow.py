@@ -18,10 +18,15 @@ assert len(products) >= 6, "Expected at least 6 products"
 first_product = products[0]
 print(f"Sample product: {first_product['name']} - ${first_product['price']}")
 
+import time
+uid = str(int(time.time()))[-5:]
+test_username = f'burgerfan_{uid}'
+test_email = f'burgerfan_{uid}@example.com'
+
 print("\n--- 2. Testing Auth Registration ---")
 reg_data = {
-    'username': 'burgerfan99',
-    'email': 'burgerfan@example.com',
+    'username': test_username,
+    'email': test_email,
     'password': 'password123',
     'full_name': 'Alex Smash',
     'phone_number': '+1 555-0123'
@@ -34,7 +39,7 @@ print(f"Registered user '{auth_res['user']['username']}' with token: {token[:10]
 
 print("\n--- 3. Testing Auth Login ---")
 login_data = {
-    'username': 'burgerfan@example.com', # test email login
+    'username': test_email, # test email login
     'password': 'password123'
 }
 res = c.post('/api/auth/login/', data=json.dumps(login_data), content_type='application/json')
@@ -92,7 +97,7 @@ print("\n--- 9. Testing Razorpay Verification (Test Mode) ---")
 verify_data = {
     'order_number': order_num,
     'razorpay_order_id': pay_info['razorpay_order_id'],
-    'razorpay_payment_id': 'pay_test_SmashCity12345',
+    'razorpay_payment_id': f'pay_test_{uid}_{int(time.time())}',
     'razorpay_signature': 'test_sig_SmashCitySignature'
 }
 res = c.post('/api/payments/verify/', data=json.dumps(verify_data), content_type='application/json')

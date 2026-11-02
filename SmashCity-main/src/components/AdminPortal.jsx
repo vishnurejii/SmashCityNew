@@ -27,8 +27,13 @@ import {
   Tag,
   Eye,
   EyeOff,
-  Check
+  Check,
+  QrCode,
+  Copy,
+  Printer,
+  Sparkles
 } from 'lucide-react';
+import QRCode from 'qrcode';
 import { ordersApi, deliveryApi, menuApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -81,14 +86,44 @@ const AdminPortal = ({ onNavigate }) => {
   // Selected Order for detail modal
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  // Assign Rider modal state
-  const [assignRiderOrder, setAssignRiderOrder] = useState(null);
-  const [riderName, setRiderName] = useState('');
-  const [riderPhone, setRiderPhone] = useState('');
-  const [assigning, setAssigning] = useState(false);
+  // Dispatch QR Code modal state
+  const [dispatchQrOrder, setDispatchQrOrder] = useState(null);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
+  const [copiedOrderNumber, setCopiedOrderNumber] = useState(false);
 
   // Status updating indicator
   const [updatingOrderId, setUpdatingOrderId] = useState(null);
+
+  // Keep dispatchQrOrder in sync with live order state from polling
+  const liveDispatchOrder = dispatchQrOrder
+    ? orders.find((o) => o.order_number === dispatchQrOrder.order_number) || dispatchQrOrder
+    : null;
+
+  // Generate QR code whenever an order is selected for dispatch
+  useEffect(() => {
+    if (!dispatchQrOrder) {
+      setQrCodeDataUrl('');
+      setCopiedOrderNumber(false);
+      return;
+    }
+
+    const payload = JSON.stringify({
+      type: 'SMASHCITY_ORDER_PICKUP',
+      order_number: dispatchQrOrder.order_number,
+      total_amount: dispatchQrOrder.total_amount,
+    });
+
+    QRCode.toDataURL(payload, {
+      width: 340,
+      margin: 2,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF',
+      },
+    })
+      .then((url) => setQrCodeDataUrl(url))
+      .catch((err) => console.error('Failed to generate dispatch QR:', err));
+  }, [dispatchQrOrder]);
 
   // Quick admin login state (if not logged in as admin)
   const [adminUsername, setAdminUsername] = useState('admin');
@@ -235,28 +270,6 @@ const AdminPortal = ({ onNavigate }) => {
     }
   };
 
-  // Handle Assign Delivery Partner
-  const handleAssignRiderSubmit = async (e) => {
-    e.preventDefault();
-    if (!assignRiderOrder) return;
-    setAssigning(true);
-    try {
-      await ordersApi.updateOrderStatus(assignRiderOrder.order_number, {
-        status: assignRiderOrder.status === 'READY_FOR_PICKUP' ? 'OUT_FOR_DELIVERY' : assignRiderOrder.status,
-        assigned_delivery_partner: riderName.trim(),
-        delivery_partner_phone: riderPhone.trim(),
-        note: `Assigned delivery partner ${riderName.trim()} (${riderPhone.trim()})`,
-      });
-      setAssignRiderOrder(null);
-      setRiderName('');
-      setRiderPhone('');
-      await fetchOrders(true);
-    } catch (err) {
-      alert(err.message || 'Failed to assign delivery partner');
-    } finally {
-      setAssigning(false);
-    }
-  };
 
   const handleAdminLogin = async (e) => {
     e.preventDefault();
@@ -741,15 +754,16 @@ const AdminPortal = ({ onNavigate }) => {
                       </div>
 
                       <button
-                        onClick={() => {
-                          setAssignRiderOrder(order);
-                          setRiderName(order.assigned_delivery_partner || '');
-                          setRiderPhone(order.delivery_partner_phone || '');
-                        }}
-                        className="w-full py-1.5 bg-[#1e1e1e] hover:bg-[#282828] border border-[#333] hover:border-accent text-accent font-bold uppercase tracking-wider text-[11px] rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                        onClick={() => setDispatchQrOrder(order)}
+                        className={`w-full mt-2 py-2.5 font-black uppercase tracking-wider text-xs rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md ${
+                          order.assigned_delivery_partner
+                            ? 'bg-[#181818] hover:bg-[#222] border border-green-500/40 text-green-400 hover:text-white'
+                            : 'bg-accent hover:bg-white text-black shadow-accent/20 hover:scale-[1.01] active:scale-[0.99]'
+                        }`}
+                        title="Show pickup QR code for delivery boy to scan"
                       >
-                        <Bike className="w-3.5 h-3.5" />
-                        {order.assigned_delivery_partner ? 'Reassign Rider' : 'Assign Rider'}
+                        <QrCode className="w-4 h-4" />
+                        <span>{order.assigned_delivery_partner ? 'View Dispatch QR' : 'Show Dispatch QR'}</span>
                       </button>
                     </div>
                   </div>
@@ -1153,99 +1167,137 @@ const AdminPortal = ({ onNavigate }) => {
     )}
   </main>
 
-      {/* Assign Delivery Partner Modal */}
-      {assignRiderOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-md bg-[#141414] border-2 border-border rounded-2xl p-6 shadow-2xl space-y-5 text-white">
-            <div className="flex justify-between items-center pb-3 border-b border-[#262626]">
-              <div className="flex items-center gap-2.5">
-                <Bike className="w-5 h-5 text-accent" />
-                <h3 className="font-chunky text-xl tracking-wide">Assign Delivery Rider</h3>
+
+
+      {/* Dispatch QR Code Modal for Rider Self-Pickup */}
+      {dispatchQrOrder && liveDispatchOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in">
+          <div className="w-full max-w-md bg-[#121212] border-2 border-border rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 text-white relative">
+            
+            {/* Close button */}
+            <button
+              onClick={() => setDispatchQrOrder(null)}
+              className="absolute top-5 right-5 text-gray-400 hover:text-white p-1 rounded-lg hover:bg-[#202020] transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Header */}
+            <div className="flex items-center gap-3 pb-3 border-b border-[#242424]">
+              <div className="w-11 h-11 rounded-2xl bg-accent text-black font-black flex items-center justify-center shadow-lg shadow-accent/20">
+                <QrCode className="w-6 h-6" />
               </div>
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-accent bg-accent/10 px-2 py-0.5 rounded border border-accent/20">
+                  Instant Rider Dispatch
+                </span>
+                <h3 className="font-chunky text-xl text-white tracking-wide mt-0.5">
+                  Order Pickup QR
+                </h3>
+              </div>
+            </div>
+
+            {/* Live Rider Claim Notification Banner */}
+            {liveDispatchOrder.status === 'OUT_FOR_DELIVERY' || liveDispatchOrder.assigned_delivery_partner ? (
+              <div className="p-3.5 bg-green-950/60 border border-green-500/50 rounded-2xl flex items-center gap-3 animate-in zoom-in-95">
+                <div className="w-9 h-9 rounded-xl bg-green-500/20 text-green-400 border border-green-500/40 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-green-300">
+                    Claimed by {liveDispatchOrder.assigned_delivery_partner}!
+                  </p>
+                  <p className="text-[11px] text-green-400/80">
+                    Order is now Out for Delivery with this rider.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="p-3 bg-[#181818] border border-[#282828] rounded-xl text-center">
+                <p className="text-xs text-gray-300 font-medium">
+                  Delivery rider should scan this QR code using their <strong className="text-accent">Rider Portal</strong> to claim & take this order.
+                </p>
+              </div>
+            )}
+
+            {/* Large Scannable QR Code */}
+            <div className="flex flex-col items-center justify-center py-1">
+              <div className="p-4 bg-white rounded-3xl shadow-2xl border-4 border-accent relative group">
+                {qrCodeDataUrl ? (
+                  <img
+                    src={qrCodeDataUrl}
+                    alt={`Dispatch QR for ${liveDispatchOrder.order_number}`}
+                    className="w-56 h-56 object-contain"
+                  />
+                ) : (
+                  <div className="w-56 h-56 flex items-center justify-center text-black font-bold text-xs">
+                    Generating QR...
+                  </div>
+                )}
+              </div>
+
+              {/* Order Number Badge */}
+              <div className="mt-4 flex items-center gap-2">
+                <span className="font-mono text-base font-black text-white bg-[#1a1a1a] px-3 py-1 rounded-xl border border-[#333]">
+                  {liveDispatchOrder.order_number}
+                </span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard?.writeText(liveDispatchOrder.order_number);
+                    setCopiedOrderNumber(true);
+                    setTimeout(() => setCopiedOrderNumber(false), 2000);
+                  }}
+                  className="p-1.5 bg-[#1a1a1a] hover:bg-[#252525] border border-[#333] hover:border-accent rounded-xl text-gray-300 hover:text-white transition-colors cursor-pointer text-xs flex items-center gap-1 font-bold"
+                  title="Copy Order Number"
+                >
+                  {copiedOrderNumber ? (
+                    <Check className="w-4 h-4 text-green-400" />
+                  ) : (
+                    <Copy className="w-4 h-4 text-accent" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Order Quick Metadata */}
+            <div className="bg-[#0c0c0c] p-3 rounded-2xl border border-[#222] text-xs space-y-1.5">
+              <div className="flex justify-between text-gray-400">
+                <span>Customer:</span>
+                <span className="font-bold text-white">{liveDispatchOrder.customer_name || 'Guest'}</span>
+              </div>
+              <div className="flex justify-between text-gray-400">
+                <span>Delivery Address:</span>
+                <span className="font-medium text-white truncate max-w-[200px]" title={liveDispatchOrder.delivery_address}>
+                  {liveDispatchOrder.delivery_address}
+                </span>
+              </div>
+              <div className="flex justify-between text-gray-400">
+                <span>Order Total:</span>
+                <span className="font-bold text-accent font-mono">${liveDispatchOrder.total_amount}</span>
+              </div>
+              <div className="flex justify-between text-gray-400">
+                <span>Items:</span>
+                <span className="font-medium text-white">{liveDispatchOrder.items?.length || 1} items</span>
+              </div>
+            </div>
+
+            {/* Action Footer */}
+            <div className="flex items-center gap-2 pt-2">
               <button
-                onClick={() => setAssignRiderOrder(null)}
-                className="text-gray-400 hover:text-white"
+                onClick={() => window.print()}
+                className="flex-1 py-2.5 bg-[#1c1c1c] hover:bg-[#282828] border border-[#333] hover:border-accent text-gray-300 hover:text-white font-bold uppercase text-xs rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <Printer className="w-4 h-4 text-accent" />
+                Print Ticket
+              </button>
+              <button
+                onClick={() => setDispatchQrOrder(null)}
+                className="flex-1 py-2.5 bg-accent hover:bg-white text-black font-black uppercase text-xs rounded-xl transition-all shadow-md shadow-accent/20 cursor-pointer"
+              >
+                Close
               </button>
             </div>
 
-            <p className="text-xs text-gray-400">
-              Assign a rider to order <strong className="text-accent font-mono">{assignRiderOrder.order_number}</strong>.
-              This will update customer tracking and notify rider app.
-            </p>
-
-            <form onSubmit={handleAssignRiderSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-1.5">
-                  Rider Full Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Alex Swift, John Davis"
-                  value={riderName}
-                  onChange={(e) => setRiderName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#0a0a0a] border border-[#2d2d2d] focus:border-accent rounded-xl text-xs text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-1.5">
-                  Rider Contact Phone
-                </label>
-                <input
-                  type="tel"
-                  placeholder="e.g. +1 555-0192"
-                  value={riderPhone}
-                  onChange={(e) => setRiderPhone(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#0a0a0a] border border-[#2d2d2d] focus:border-accent rounded-xl text-xs text-white"
-                />
-              </div>
-
-              {/* Preset Riders */}
-              <div>
-                <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">
-                  Quick Select Active Riders:
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { name: 'Alex Swift', phone: '+1 555-8391' },
-                    { name: 'Sam Runner', phone: '+1 555-4820' },
-                    { name: 'Marcus Jet', phone: '+1 555-2947' },
-                  ].map((r) => (
-                    <button
-                      key={r.name}
-                      type="button"
-                      onClick={() => {
-                        setRiderName(r.name);
-                        setRiderPhone(r.phone);
-                      }}
-                      className="px-2.5 py-1 bg-[#1a1a1a] hover:bg-accent hover:text-black border border-[#333] rounded text-[11px] font-bold transition-colors"
-                    >
-                      {r.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-2 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setAssignRiderOrder(null)}
-                  className="px-4 py-2 border border-border text-gray-400 hover:text-white rounded-xl text-xs font-bold uppercase"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={assigning}
-                  className="px-5 py-2 bg-accent hover:bg-white text-black font-bold uppercase text-xs rounded-xl transition-colors shadow-lg shadow-accent/10"
-                >
-                  {assigning ? 'Assigning...' : 'Confirm Assignment'}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
@@ -1287,6 +1339,17 @@ const AdminPortal = ({ onNavigate }) => {
                 {selectedOrder.delivery_otp || '----'}
               </span>
             </div>
+
+            {/* Quick Dispatch QR Action Button */}
+            <button
+              onClick={() => {
+                setDispatchQrOrder(selectedOrder);
+              }}
+              className="w-full py-3 bg-accent hover:bg-white text-black font-black uppercase tracking-wider text-xs rounded-xl transition-all shadow-lg shadow-accent/20 flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <QrCode className="w-4 h-4 text-black" />
+              <span>Show Rider Dispatch QR (Scan to Claim)</span>
+            </button>
 
             {/* Customer & Address */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
