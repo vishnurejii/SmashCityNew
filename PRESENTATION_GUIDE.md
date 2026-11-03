@@ -1,228 +1,289 @@
-# 🍔 SmashCity — Complete Presentation Kit & Speaking Script
+# 🍔 SmashCity — Master Presentation Script & Complete Slide/Page Guide
 
-This document contains everything you need to deliver an outstanding presentation on **SmashCity**: from technical architecture and database models to a word-for-word presentation script, live demo walkthrough cues, and high-scoring Q&A answers.
-
----
-
-## Table of Contents
-1. [Project Overview & Key Value Propositions](#1-project-overview--key-value-propositions)
-2. [Technical Architecture & Data Flow](#2-technical-architecture--data-flow)
-3. [Key Engineering Highlights (What makes this project standout)](#3-key-engineering-highlights)
-4. [Slide-by-Slide Presentation Deck & Speaking Script](#4-slide-by-slide-presentation-deck--speaking-script)
-5. [Live Demo Walkthrough Cue Sheet (Split-Screen)](#5-live-demo-walkthrough-cue-sheet)
-6. [Top Technical Q&A / Viva Questions & Model Answers](#6-top-technical-qa--viva-questions--model-answers)
+This is the **complete, page-by-page presentation script** for **SmashCity**. It gives you the exact words to speak, screen-by-screen navigation cues, technical architecture highlights, and a 3-way split-screen live demonstration script (Customer + Admin + Rider).
 
 ---
 
-## 1. Project Overview & Key Value Propositions
-
-* **Project Name:** SmashCity
-* **Tagline:** Premium Urban Burger Ordering Platform with Live Delivery Tracking & Secure Payments
-* **Type:** Production-grade Full-Stack Web Application
-* **Frontend:** React 19, Vite, Tailwind CSS, Framer Motion, Lucide Icons
-* **Backend:** Python 3.12+, Django 5.x, Django REST Framework (DRF)
-* **Database:** SQLite (Development) / PostgreSQL-ready (Production)
-* **Payments:** Razorpay Payment Gateway (HMAC-SHA256 signature verification) + Cash on Delivery (COD)
-* **Authentication:** Token-based REST Authentication + Django Session / Superuser Admin
-
-### Core Purpose
-SmashCity bridges the gap between high-end cinematic restaurant branding and robust enterprise-grade e-commerce capabilities. Unlike generic tutorial projects, it implements strict server-side validation, database atomic transactions, idempotency safeguards against duplicate orders, persistent guest/user carts, and real-time 6-stage order tracking.
+## Quick Navigation
+1. [Executive Summary & Tech Stack](#1-executive-summary--tech-stack)
+2. [Presentation Flow & Timing Overview](#2-presentation-flow--timing-overview)
+3. [Page-by-Page Speaking Script](#3-page-by-page-speaking-script)
+   - [Page 1: Customer Storefront (Hero & Brand Showcase)](#page-1-customer-storefront-hero--brand-showcase)
+   - [Page 2: Dynamic Menu & Real-Time Inventory](#page-2-dynamic-menu--real-time-inventory)
+   - [Page 3: Interactive Cart ("Smash Bag") & Coupon Engine](#page-3-interactive-cart-smash-bag--coupon-engine)
+   - [Page 4: Checkout Modal & Secure Payment Gateway](#page-4-checkout-modal--secure-payment-gateway)
+   - [Page 5: Live Order Tracking & Customer 4-Digit OTP](#page-5-live-order-tracking--customer-4-digit-otp)
+   - [Page 6: Kitchen & Operations Admin Console (QR Dispatch)](#page-6-kitchen--operations-admin-console-qr-dispatch)
+   - [Page 7: Delivery Partner / Rider Portal (Camera QR Scanner)](#page-7-delivery-partner--rider-portal-camera-qr-scanner)
+   - [Page 8: Multi-Role Authentication (Customer / Rider / Admin)](#page-8-multi-role-authentication-customer--rider--admin)
+4. [Live 3-Way Split-Screen Demonstration Script](#4-live-3-way-split-screen-demonstration-script)
+5. [Technical Architecture & Cloud Infrastructure](#5-technical-architecture--cloud-infrastructure)
+6. [Top Technical Viva / Evaluator Q&A](#6-top-technical-viva--evaluator-qa)
 
 ---
 
-## 2. Technical Architecture & Data Flow
+## 1. Executive Summary & Tech Stack
+
+* **Platform Name:** SmashCity
+* **Tagline:** Ultra-Fast Urban Burger Ordering Platform with QR-Code Self-Pickup Dispatch, Doorstep OTP Verification & Cloud Database
+* **Frontend:** React 19, Vite, Tailwind CSS, Framer Motion, Lucide Icons, HTML5-QRCode, Canvas-Confetti
+* **Backend:** Python 3.12+, Django 5.x, Django REST Framework (DRF), Gunicorn
+* **Database:** Neon Serverless PostgreSQL (Cloud Lakebase Postgres with connection pooling)
+* **Cloud Hosting:** Vercel (Frontend SPA) + Render (Backend Web Service)
+* **Payments:** Razorpay API (HMAC-SHA256 signature verification) + Cash on Delivery (COD)
+* **Security:** Server-Side Price Recalculation, UUID Idempotency Keys, Atomic Transactions (`transaction.atomic()`), Token Authentication
+
+---
+
+## 2. Presentation Flow & Timing Overview
+
+| Segment | Topic | Estimated Time |
+|---|---|---|
+| **Intro** | Project Vision, Business Problem, & Modern Architecture | 1 min |
+| **Storefront & Menu** | Hero, Category Filtering, Dynamic Stock Sync | 1.5 min |
+| **Cart & Checkout** | Cart Drawer, Server-side Coupon Engine, Razorpay & COD | 1.5 min |
+| **Live Tracking & OTP** | 6-Stage Timeline, Secret 4-Digit Verification OTP | 1 min |
+| **Kitchen Operations** | Live Admin Console, Pipeline Advance, Dynamic QR Dispatch | 1.5 min |
+| **Delivery Rider Portal**| Live Camera Scanner, Route Navigation, Doorstep OTP Verification | 1.5 min |
+| **Live 3-Way Demo** | End-to-end interactive demo across 3 windows | 2 - 3 min |
+| **Architecture & Q&A** | Neon Postgres, Render/Vercel CI/CD, Technical Viva | 2 min |
+| **Total** | | **~10 - 12 mins** |
+
+---
+
+## 3. Page-by-Page Speaking Script
+
+---
+
+### Page 1: Customer Storefront (Hero & Brand Showcase)
+* **URL:** `http://localhost:5173/` or your Vercel URL
+* **Screen Focus:** Navigation Bar, Hero Section, Animated Marquee, "Why SmashCity" Badges.
+
+#### 🎙️ What to Say:
+> *"Good morning/afternoon, professors and evaluators. Today, I am proud to present **SmashCity**, an enterprise-grade full-stack food ordering, kitchen dispatch, and live delivery platform.*
+>
+> *When you look at our storefront, the first thing you notice is high-impact, cinematic branding. Built with **React 19** and styled with **Tailwind CSS**, the interface combines modern dark aesthetic, fluid typography, and micro-animations powered by **Framer Motion**.*
+>
+> *In the header, we have an adaptive navigation system: it instantly detects the user's role—whether they are a hungry customer, a delivery rider, or an operations manager—and displays the appropriate navigation links and status badges.*
+>
+> *As we scroll down the hero section, the page highlights our core value propositions: ultra-fast 25-minute delivery, freshly smashed patties with crispy lace edges, and 100% certified halal chicken. Notice how smooth the interactions feel without any page refresh or layout jitter."*
+
+---
+
+### Page 2: Dynamic Menu & Real-Time Inventory
+* **URL:** `http://localhost:5173/#menu`
+* **Screen Focus:** Category tabs (Burgers, Sides, Sauces, Beverages), Search bar, Diet badges, "Sold Out" indicators.
+
+#### 🎙️ What to Say:
+> *"Moving to our **Dynamic Menu section**, every category, product description, price, and image is queried directly from our **Django REST Framework** backend via our `/api/menu/products/` endpoint.*
+>
+> *Customers can filter through categories—Burgers, Sides, Sauces, and Beverages—with instant client-side tab switching. Notice the real-time search and diet badges highlighting vegetarian or signature items.*
+>
+> *Crucially, our menu is connected to real-time inventory. If a kitchen manager marks an item as 'Sold Out' in the Admin Console, the item card immediately displays a distinct 'Sold Out' badge and disables the 'Add to Bag' button, preventing customers from ordering unavailable food. This solves one of the biggest friction points in modern restaurant operations."*
+
+---
+
+### Page 3: Interactive Cart ("Smash Bag") & Coupon Engine
+* **URL:** Click the Cart icon (<kbd>ShoppingBag</kbd>) in the top-right navbar.
+* **Screen Focus:** Slide-out drawer, quantity counters, coupon code box, free delivery progress bar.
+
+#### 🎙️ What to Say:
+> *"When a customer clicks 'Add to Order', the **Smash Bag** slide-out drawer smoothly opens from the right.*
+>
+> *Let's highlight two key engineering practices here:*
+> 1. *First, **Persistent State**: The cart seamlessly manages both guest sessions and authenticated users. Guest sessions use a persistent guest key in local storage, so if a customer refreshes the page or comes back later, their selected items are safely preserved.*
+> 2. *Second, **Server-Side Coupon Engine**: Watch what happens when I enter the promotional coupon code `SMASH10` and click 'Apply'. The frontend does not calculate the discount! Instead, it sends an API request to `/api/orders/validate-coupon/`. The Django backend verifies that the coupon is active, checks the minimum order spend threshold, and calculates the exact discount amount server-side. If I enter `SMASH20`, it calculates a 20% discount on orders above $30.*
+>
+> *We also have a dynamic delivery fee bar encouraging customers to add one more item to qualify for priority delivery."*
+
+---
+
+### Page 4: Checkout Modal & Secure Payment Gateway
+* **URL:** Click 'Proceed to Checkout' inside the Smash Bag drawer.
+* **Screen Focus:** Customer name, phone, address fields, Payment Mode toggle (Cash on Delivery vs Razorpay Online Payment).
+
+#### 🎙️ What to Say:
+> *"Clicking 'Proceed to Checkout' opens our streamlined checkout modal.*
+>
+> *Here, customers enter their delivery address and contact details. For logged-in users, previously saved delivery addresses from their profile address book are auto-populated.*
+>
+> *Now, let's look at the financial engineering:*
+> - *SmashCity implements **Zero-Trust Client Pricing**. The frontend never sends total dollar amounts to the backend. It only sends product IDs and quantities. The Django backend queries the database for active prices, recalculates subtotals, tax, and delivery fees, and validates coupon rules on the server.*
+> - *To protect against accidental double-clicks or unstable mobile networks, the checkout process generates a unique **UUID Idempotency Key**. If duplicate requests arrive, the backend safely recognizes the key and returns the existing order instead of double-billing.*
+> - *For payments, we offer dual options: **Cash on Delivery (COD)**, and **Razorpay Online Payment**. For Razorpay, the backend creates an authorized order with currency subunits and verifies the cryptographic **HMAC-SHA256 signature** before confirming payment status.*
+>
+> *Let's select 'Cash on Delivery' and click 'Confirm & Place Order'."*
+
+---
+
+### Page 5: Live Order Tracking & Customer 4-Digit OTP
+* **URL:** Order placed screen / Click 'Track Order' or header tracker.
+* **Screen Focus:** 6-stage vertical/horizontal stepper, **Prominent 4-digit Delivery OTP Badge**, delivery address, assigned rider card, live status history log.
+
+#### 🎙️ What to Say:
+> *"Immediately upon placing the order, the customer is presented with our **Live Order Tracking Screen**.*
+>
+> *Here is the centerpiece of our customer security:*
+> - *Notice this bright amber badge displaying the **Secret 4-Digit Delivery OTP**—in this case, code `8492`.*
+> - *The instruction explicitly informs the customer: **'Share this code ONLY with your delivery partner at your doorstep to verify handover.'** This completely eliminates fake deliveries, wrong drop-offs, and driver fraud.*
+> - *Below the OTP, customers see the **Live 6-Stage Delivery Pipeline**: `Order Placed` ➔ `Confirmed` ➔ `Preparing` ➔ `Ready for Pickup` ➔ `Out for Delivery` ➔ `Delivered`.*
+> - *The modal uses lightweight reactive polling against `/api/delivery/<order_number>/`. As the kitchen and rider update the order status, this tracker advances in real time without the customer having to refresh the page."*
+
+---
+
+### Page 6: Kitchen & Operations Admin Console (QR Dispatch)
+* **URL:** Click 'Staff / Operations' in header or navigate to `/admin` in the React app.
+* **Screen Focus:** Operations Dashboard, Revenue KPI cards, Order status transition buttons (`Confirm`, `Prepare`, `Ready for Pickup`), **Dispatch QR Code button and modal**, Menu & Inventory Manager.
+
+#### 🎙️ What to Say:
+> *"Now let's switch perspectives to the restaurant's operational nerve center: the **SmashCity Admin & Kitchen Console**.*
+>
+> *This is a purpose-built React operations console designed for kitchen tablets and managers:*
+> 1. *At the top, managers have real-time KPI metrics: Today's Revenue, Active Kitchen Orders, Dispatch Rate, and Menu Items in Stock.*
+> 2. *Below, incoming orders appear in an interactive pipeline. Kitchen staff can advance an order from 'Placed' to 'Preparing' with one tap on the orange **Prepare** button.*
+> 3. *When the kitchen finishes grilling the burger and packaging the fries, they tap **Ready for Pickup**.*
+>
+> *Now, notice our signature feature: **The QR Code Dispatch System**.*
+> - *Instead of cumbersome manual assignment dropdowns, managers simply click the yellow **'Dispatch QR'** button.*
+> - *A large, high-contrast QR code is generated on the kitchen screen, complete with order number, item count, and a print ticket button.*
+> - *The screen displays a live pulse listener: **'Waiting for rider to scan...'** As soon as an arriving courier scans this code, the modal automatically turns green and confirms the rider's name and phone in real time!"*
+
+---
+
+### Page 7: Delivery Partner / Rider Portal (Camera QR Scanner)
+* **URL:** Click 'Delivery Rider' in the header or log in as `rider` (`/delivery`).
+* **Screen Focus:** Rider header with active profile, KPI badges (Active Deliveries, Today's Earnings), **'Scan Pickup QR' button**, Camera Scanner modal with laser crosshair, Active delivery card with Google Maps link, and **Customer OTP Verification Modal**.
+
+#### 🎙️ What to Say:
+> *"Now let's look at the third pillar of SmashCity: the **Delivery Rider Portal**.*
+>
+> *Designed specifically for mobile couriers on bikes or scooters:*
+> 1. *The rider logs in with their credentials—for example, rider **Alex Swift**.*
+> 2. *When the rider arrives at the restaurant kitchen, they tap the yellow **'Scan Pickup QR'** button.*
+> 3. *This opens our integrated **HTML5 Camera Scanner**. It turns on the device camera, displays a precision laser targeting crosshair, and when it aligns with the kitchen's QR code on the admin screen, it plays an **audio chime** using the Web Audio API!*
+> 4. *The order is instantly claimed by the rider. Our backend concurrency safeguards ensure that an order cannot be double-claimed by two riders.*
+> 5. *The order automatically transitions to **Out for Delivery**, and the rider's screen switches to the active delivery route with customer address, direct one-tap **Google Maps Navigation**, and one-tap **Phone Call**.*
+>
+> *When the rider arrives at the customer's doorstep:*
+> - *The rider taps **'Verify Delivery OTP'**.*
+> - *A 4-box OTP input drawer opens with auto-focus and auto-advance.*
+> - *The rider asks the customer for their 4-digit code. If the rider enters the wrong code, the backend rejects it with an error. When the correct code is entered, the order transitions to **Delivered**, celebratory confetti bursts on screen, and COD payment is marked as PAID!"*
+
+---
+
+### Page 8: Multi-Role Authentication (Customer / Rider / Admin)
+* **URL:** Click 'Sign In' in navbar.
+* **Screen Focus:** Role Switcher pills (`Customer`, `Delivery`, `Admin`), One-click Demo Auto-Fill helpers.
+
+#### 🎙️ What to Say:
+> *"To tie the entire ecosystem together seamlessly, SmashCity features a unified **Role-Based Authentication System**.*
+>
+> *In our authentication modal, users can select their intended portal with dedicated tabs:*
+> - * **Customer**: Allows ordering, managing saved delivery addresses, and tracking past order history.*
+> - * **Delivery Rider**: Pre-configured with demo courier credentials (`rider` / `rider123`), automatically routing to the mobile delivery dashboard.*
+> - * **Admin & Kitchen Operations**: Pre-configured with manager credentials (`admin` / `admin123`), granting access to the kitchen pipeline and menu management.*
+>
+> *Authentication uses token-based REST communication with the backend, securely storing credentials in session memory and local storage with role-based route guards."*
+
+---
+
+## 4. Live 3-Way Split-Screen Demonstration Script
+
+To deliver an unforgettable presentation, open **three browser windows side-by-side** on your screen:
+1. **Window A (Left):** Customer Storefront (`http://localhost:5173/`)
+2. **Window B (Middle):** Kitchen Admin Console (`http://localhost:5173/` logged in as `admin`, viewing `/admin`)
+3. **Window C (Right):** Delivery Rider Portal (`http://localhost:5173/` logged in as `rider`, viewing `/delivery`)
+
+---
+
+### Step-by-Step Live Demo Action Chart
+
+| Step | Window | Action | What to Say (Verbatim) |
+|---|---|---|---|
+| **1** | **Left (Customer)** | Add **The Classic Smash** & **Crispy Fries** to cart. Apply coupon `SMASH10`. | *"I am adding a burger and fries to my bag. I apply promo code `SMASH10`—the server validates it and discounts 10%."* |
+| **2** | **Left (Customer)** | Click Checkout, select COD, click **'Confirm & Place Order'**. | *"I submit the order. An atomic transaction creates the order with unique number `SC-XXXX` and generates a secret 4-digit OTP: `8492`."* |
+| **3** | **Middle (Kitchen)** | Point to the order card appearing in the kitchen queue. Tap **'Preparing'**, then **'Ready for Pickup'**. | *"Notice the kitchen console immediately detects the new order. Kitchen staff click 'Preparing', then 'Ready for Pickup'. Look at the customer screen on the left—it advances automatically!"* |
+| **4** | **Middle (Kitchen)** | Click **'Dispatch QR'** button. | *"Now the kitchen displays the pickup QR code on the counter terminal for incoming couriers."* |
+| **5** | **Right (Rider)** | Click **'Scan Pickup QR'** ➔ Click the **1-Click Test Simulation chip** for the order (or point camera at QR). | *"Rider Alex Swift arrives at the counter, opens the scanner, and scans the kitchen QR code. Notice the audio chime!"* |
+| **6** | **Middle (Kitchen)** | Point to the green notification banner on the kitchen terminal. | *"The kitchen screen turns green instantly with: 'Claimed by Alex Swift (+1 555-8391)'!"* |
+| **7** | **Right (Rider)** | Click **'Verify Delivery OTP'** on the active delivery card. Enter `8492`. | *"The rider reaches the customer's house, asks the customer for their OTP, enters `8492`, and taps 'Confirm Delivery'."* |
+| **8** | **All Windows** | Point to the confetti and status update on all 3 screens. | *"The delivery is verified! The customer tracker shows 'Delivered', the rider earns their delivery fee, and the kitchen logs the completed ticket. The entire loop is complete!"* |
+
+---
+
+## 5. Technical Architecture & Cloud Infrastructure
+
+### Architecture Diagram
 
 ```mermaid
-graph TD
-    subgraph Client ["Frontend (React 19 + Vite @ Port 5173)"]
-        UI[Cinematic UI / Framer Motion]
-        AuthCtx[AuthContext - Token & User]
-        CartCtx[CartContext - Sync & Recalculate]
-        Polling[Live Delivery Stepper Auto-Polling]
+graph LR
+    subgraph Frontend ["Frontend (Vercel)"]
+        React[React 19 SPA]
+        Vite[Vite Bundler]
+        Tailwind[Tailwind CSS]
+        Scanner[HTML5 Camera QR Engine]
     end
 
-    subgraph API ["Django REST Backend (@ Port 8000)"]
-        Router[/api/ Base Routing]
-        AuthApp[accounts: JWT/Token, Profiles, Addresses]
-        MenuApp[menu: Categories, Products, Image Fallbacks]
-        CartApp[cart: Server-side Cart & Item Sync]
-        OrderApp[orders: Atomic Creation, Idempotency, Coupons]
-        PayApp[payments: Razorpay API & Signature Verify]
-        DelivApp[delivery: 6-Stage Timeline Engine]
+    subgraph Backend ["Backend API (Render)"]
+        Gunicorn[Gunicorn WSGI]
+        Django[Django 5.x REST Framework]
+        Apps[Accounts • Menu • Cart • Orders • Delivery • Payments]
     end
 
-    subgraph DB ["Database Layer"]
-        Models[(SQLite / PostgreSQL)]
+    subgraph Database ["Serverless Database (Neon)"]
+        NeonDB[(Neon Lakebase PostgreSQL)]
+        Pooler[Connection Pooler ep-floral-feather]
     end
 
-    subgraph Gateway ["External Gateways"]
-        Razorpay[Razorpay Payment API]
+    subgraph Gateways ["External Integrations"]
+        RazorpayAPI[Razorpay Payment Gateway]
     end
 
-    UI --> AuthCtx & CartCtx & Polling
-    AuthCtx -->|REST JSON / Token| Router
-    CartCtx -->|REST JSON| Router
-    Polling -->|GET /api/delivery/:order_num/| Router
-    Router --> AuthApp & MenuApp & CartApp & OrderApp & PayApp & DelivApp
-    AuthApp & MenuApp & CartApp & OrderApp & PayApp & DelivApp --> Models
-    PayApp -->|Order Creation & Webhooks| Razorpay
+    React -->|HTTPS JSON REST| Django
+    Scanner -->|Decode QR Payload| React
+    Django -->|PostgreSQL Connection Pooling| NeonDB
+    Django -->|HMAC-SHA256 Signature Verify| RazorpayAPI
 ```
 
----
-
-## 3. Key Engineering Highlights
-
-When presenting to evaluators, professors, or clients, emphasize these **advanced engineering practices**:
-
-1. **Server-Side Price Recalculation (Anti-Tampering):**
-   * The client only sends product IDs and desired quantities.
-   * Prices, subtotal, tax ($1.50), delivery fee ($2.99), and coupon discounts are **never trusted from the frontend**; they are queried and computed directly from the database inside Django.
-2. **Idempotency Key Protection:**
-   * Double clicks or network retries during order submission generate the same UUID idempotency token.
-   * Django checks this key; if the order is already created, it returns the existing record rather than double-charging or creating duplicate orders.
-3. **Database Transactions (`transaction.atomic()`):**
-   * Order records, individual order items, and delivery history logs are written inside an atomic transaction block. If any step fails, the entire database state rolls back cleanly.
-4. **Live 6-Stage Delivery Lifecycle:**
-   * `[Order Placed] -> [Order Confirmed] -> [Preparing] -> [Ready for Pickup] -> [Out for Delivery] -> [Delivered]`.
-   * Order tracking includes automatic status history logging with timestamps, notes, and staff advancement APIs.
-5. **Hybrid Payment Processing:**
-   * Direct online payments via Razorpay using standard cryptographic `HMAC-SHA256` signature verification.
-   * Native Cash on Delivery (COD) that transitions payment status to `PAID` upon final delivery stage.
-6. **Live Menu & Inventory Management (Admin Console):**
-   * Real-time item availability controls ("Mark Not Available / Sold Out" and "Mark Available").
-   * Full CRUD operations: "+ Add New Item" modal, instant item deletion with cascading DB safety, and reactive storefront "Sold Out" state synchronization.
+### Key Technical Talking Points:
+1. **Neon Serverless PostgreSQL:**
+   - Powered by **Neon Lakebase Postgres** with autoscaling and connection pooling.
+   - Cloud database with unpooled and pooled endpoints (`channel_binding=require&sslmode=require`).
+   - Ensures persistent customer records, order histories, and rider metrics across all instances.
+2. **Render & Vercel Production Deployment:**
+   - **Backend on Render:** Python 3.12 with Gunicorn, dynamic `$PORT` binding, dual URL routing (`/api/<endpoint>/` and `/<endpoint>/`), and root health-check endpoints.
+   - **Frontend on Vercel:** Ultra-fast CDN distribution with SPA routing rewrite rules (`vercel.json`) to prevent 404s on browser reloads.
+3. **Database Concurrency & ACID Safety:**
+   - All order creation and stock decrements are encapsulated within `django.db.transaction.atomic()`.
+   - Concurrency safeguards prevent multiple couriers from claiming the same order simultaneously.
 
 ---
 
-## 4. Slide-by-Slide Presentation Deck & Speaking Script
+## 6. Top Technical Viva / Evaluator Q&A
 
-### Slide 1: Title & Introduction
-* **Visual:** SmashCity logo, Project Title, Your Name, Tech Stack Icons (React, Django, Python, Tailwind).
-* **Time:** ~45 seconds
-* **Script:**
-  > *"Good morning/afternoon, everyone. Today, I am excited to present **SmashCity**, a full-stack, enterprise-ready food ordering and live delivery tracking platform built specifically for modern culinary brands.*
-  > *While many web applications look great on the surface or have simple backends, SmashCity was engineered to deliver both: a cinematic, high-conversion React 19 user interface and a resilient, secure Python Django REST Framework backend with full payment processing and real-time order lifecycle tracking. Let me walk you through how it was built."*
+### Q1: What makes SmashCity different from a basic tutorial food app?
+> **Answer:** *"Most tutorial apps are simple frontend mockups with static JSON or vulnerable backends that accept price calculations from the client. SmashCity is engineered as a production-grade system:
+> 1. It implements **Zero-Trust Server-Side Pricing** and **UUID Idempotency Keys** to prevent duplicate orders and client tampering.
+> 2. It features an automated **QR Code Dispatch System** where couriers scan orders with live camera targeting to claim deliveries.
+> 3. It enforces **Doorstep 4-Digit OTP Verification** to guarantee physical custody handover.
+> 4. It uses a serverless cloud database on **Neon PostgreSQL** and is deployed live on **Render and Vercel**."*
 
----
+### Q2: How does the QR code dispatch system work under the hood?
+> **Answer:** *"When an order enters 'Ready for Pickup', the Admin Console uses the `qrcode` library to render a dynamic 2D barcode containing the unique order identifier (`SC-YYYYMMDD-XXXX`). The Delivery Partner Portal uses `html5-qrcode` to access the device's camera stream via WebRTC. When the scanner identifies the barcode pattern, it extracts the order number and triggers an atomic `POST /api/delivery/<order_number>/pickup/` request containing the authenticated rider's name and phone. The backend verifies that the order is not already claimed, assigns the rider, transitions the status to `OUT_FOR_DELIVERY`, and logs an audit history entry."*
 
-### Slide 2: The Problem & Opportunity
-* **Visual:** Comparison: Legacy generic food ordering apps vs. Modern demand for speed, transparency, and brand identity.
-* **Time:** ~1 minute
-* **Script:**
-  > *"Modern consumers expect three non-negotiable standards when ordering food online:*
-  > *First, **zero friction**: Instant loading, responsive layout, and smooth animations without jarring page reloads.*
-  > *Second, **total financial and data trust**: Safe payment gateways, server-side tamper-proof calculations, and instant coupon verification.*
-  > *Third, **live transparency**: Customers want to know the exact status of their food from the grill to their doorstep.*
-  > *SmashCity solves these challenges with an integrated system that connects customer ordering, secure checkout, and kitchen order management into a seamless pipeline."*
+### Q3: Why is the 4-digit OTP generated on the server instead of the frontend?
+> **Answer:** *"The delivery OTP is a security credential. In `Order.save()`, the Django model uses Python's cryptographic random generator `str(random.randint(1000, 9999))` to create the OTP upon order placement. It is stored directly in the database row. The rider's application does not know the OTP in advance; only the customer's authenticated tracking screen displays it. When the rider submits the OTP at the doorstep, the backend performs an exact match validation before allowing the status transition to `DELIVERED`."*
 
----
+### Q4: How do you handle database concurrency if two delivery riders scan the same QR code at once?
+> **Answer:** *"In `DeliveryPartnerPickupView`, we perform a concurrency check: if an order is already marked `OUT_FOR_DELIVERY` and has an `assigned_delivery_partner`, any subsequent claim request from a different rider is rejected with an HTTP 400 error: 'Order has already been claimed by [Rider Name]'. If the same rider re-scans their own order, the backend gracefully returns the order details without duplicating records."*
 
-### Slide 3: High-Level Architecture & Tech Stack
-* **Visual:** Architecture diagram showing Frontend (React 19 + Vite), Backend (Django REST Framework), Database, and Razorpay.
-* **Time:** ~1 minute 15 seconds
-* **Script:**
-  > *"Here is the high-level architecture of the system:*
-  > *On the client side, we use **React 19 with Vite** for lightning-fast module bundling, styled with **Tailwind CSS** and powered by **Framer Motion** for fluid micro-interactions and smooth slide-out drawers.*
-  > *On the server side, we selected **Python with Django REST Framework**. Django provides a robust ORM, clean MVC/MVT separation, automated admin controls, and rock-solid security defaults against CSRF and SQL injection.*
-  > *The communication layer is entirely RESTful JSON over HTTP, supporting both authenticated users with bearer tokens and guest sessions with persistent local state."*
+### Q5: How is payment verified securely with Razorpay?
+> **Answer:** *"Payment verification uses a 2-step challenge-response mechanism. First, the backend creates an order using Razorpay's API and returns a unique `order_id`. Second, once the customer completes payment in the Razorpay modal, Razorpay returns a cryptographic signature. The backend independently generates an HMAC-SHA256 hash using our secret key and the concatenated string `order_id + '|' + payment_id`. If the calculated hash matches the signature from the client, the transaction is authentic and marked as `PAID`."*
 
 ---
 
-### Slide 4: Database Schema & Modular Design
-* **Visual:** Backend App structure: `accounts`, `menu`, `cart`, `orders`, `payments`, `delivery`.
-* **Time:** ~1 minute
-* **Script:**
-  > *"The backend is architected into six decoupled Django apps following the Single Responsibility Principle:*
-  > *1. **Accounts:** Manages customer profiles, JWT/token authentication, and saved multiple delivery addresses.*
-  > *2. **Menu:** Categorized menu items, spice levels, stock availability, and dynamic pricing.*
-  > *3. **Cart:** Supports real-time addition, removal, and quantity updates.*
-  > *4. **Orders:** Handles order generation, coupon validation algorithms, and atomic line items.*
-  > *5. **Payments:** Manages Razorpay order generation and HMAC cryptographic signature verification.*
-  > *6. **Delivery:** Tracks the 6-stage delivery pipeline and timeline logs with staff management hooks."*
+## 7. Presentation Closing Statement
 
----
-
-### Slide 5: Core Technical Highlights & Security
-* **Visual:** Code snippets of `transaction.atomic()`, `idempotency_key`, and server-side pricing.
-* **Time:** ~1 minute 30 seconds
-* **Script:**
-  > *"Let's talk about three critical engineering decisions implemented in the backend:*
-  > *First, **Security Against Client Tampering**: Many vulnerable apps accept total order prices sent from the client. In SmashCity, the client only sends product IDs. The server pulls fresh prices directly from the database and recalculates subtotals, tax, delivery, and discounts on the server.*
-  > *Second, **Idempotency Safeguards**: In slow network conditions, users often tap 'Pay' twice. SmashCity issues a unique UUID idempotency key with every checkout attempt. If a duplicate request arrives, the server returns the existing order instead of creating two charges.*
-  > *Third, **Atomic Transactions**: By wrapping order creation in Django's `transaction.atomic()`, we guarantee ACID compliance. If order line items fail to write, no orphaned order record is ever left behind."*
-
----
-
-### Slide 6: Payment Architecture & 6-Stage Delivery Engine
-* **Visual:** Stepper diagram showing the 6 stages and payment verification flow.
-* **Time:** ~1 minute
-* **Script:**
-  > *"SmashCity offers dual checkout modes: Cash on Delivery and Razorpay Online Payment.*
-  > *For Razorpay, the backend creates an order with currency subunits, receives the payment signature upon user authorization, and validates the HMAC SHA-256 signature before marking the payment verified.*
-  > *Once an order is confirmed, the customer is transitioned to the **Live 6-Stage Delivery Stepper**: Order Placed, Confirmed, Preparing on the grill, Ready for pickup, Out for delivery, and Delivered.*
-  > *The client polls the delivery endpoint, and whenever kitchen staff update the status in the admin console, the customer's UI updates in real-time."*
-
----
-
-### Slide 7: Live Demonstration
-* **Visual:** Transition to live browser demo (Follow Section 5 below).
-* **Time:** ~2 to 3 minutes
-* **Script:**
-  > *"Now, let's look at the system live in action..."* (Proceed to Demo Walkthrough)
-
----
-
-### Slide 8: Future Roadmap & Extensibility
-* **Visual:** Bullet points: WebSockets / Server-Sent Events, Driver GPS Map tracking, Multi-branch inventory.
-* **Time:** ~45 seconds
-* **Script:**
-  > *"Looking ahead, the decoupled architecture of SmashCity allows for rapid expansion:*
-  > *1. Transitioning the delivery polling engine to **Django Channels with WebSockets** for push notifications.*
-  > *2. Integrating **Google Maps / Mapbox API** for real-time driver GPS location tracking.*
-  > *3. Expanding to **multi-branch franchise support** with geolocation-based store routing."*
-
----
-
-### Slide 9: Conclusion & Q&A
-* **Visual:** Summary of achievements, GitHub link, "Thank You" & "Questions Welcome".
-* **Time:** ~30 seconds
-* **Script:**
-  > *"To summarize: SmashCity demonstrates how modern React frontend techniques can combine with Python Django's robust backend engineering to create a fast, secure, and delightful food ordering platform.*
-  > *Thank you for your time. I would be happy to answer any questions!"*
-
----
-
-## 5. Live Demo Walkthrough Cue Sheet
-
-Have two browser windows arranged side-by-side:
-* **Left Window:** Customer Storefront (`http://127.0.0.1:5173/`)
-* **Right Window:** Kitchen Admin Dashboard (`http://127.0.0.1:8000/admin/`)
-
-| Step | Action on Screen | What to Say (Demo Cue) |
-|---|---|---|
-| **1. Hero & Branding** | Scroll through hero, showcase, and hook section on `localhost:5173`. | *"Notice the smooth animations, responsive typography, and clear calls-to-action showcasing the brand's identity."* |
-| **2. Dynamic Menu** | Scroll to 'The Menu' section. Click 'Burgers', 'Sides', 'Sauces'. | *"All categories and items are queried dynamically from our Django REST backend with real-time availability checks."* |
-| **3. Cart Operations** | Click 'Add to Order' on 'The Classic Smash' and 'Crispy Fries'. | *"The Smash Bag slide-out drawer opens instantly. Notice how quantity updates recalculate item totals reactively."* |
-| **4. Coupon Validation** | In coupon input, enter `SMASH10` and click 'Apply'. | *"I apply our promotional code SMASH10. The backend validates minimum spend rules and applies a 10% discount immediately."* |
-| **5. Checkout & Order Placement** | Click 'Proceed to Checkout', fill customer details, choose 'Cash on Delivery', click 'Confirm & Place Order'. | *"Our checkout modal collects address information and submits an atomic order request protected with an idempotency key."* |
-| **6. Live 6-Stage Stepper** | The Order Tracking modal appears with order number (e.g. `SC-20261030-XXXX`). | *"Immediately upon placement, the Live Order Tracker opens at Stage 1: Order Placed with full line-item details."* |
-| **7. Kitchen Admin Advance** | Switch to Django Admin -> Orders. Find the order, select 'Set status: Preparing', click 'Go'. | *"In the kitchen terminal, staff update the order to 'Preparing'. Watch the customer tracking modal on the left—it advances automatically to Step 3!"* |
-
----
-
-## 6. Top Technical Q&A / Viva Questions & Model Answers
-
-### Q1: Why did you choose React + Django REST Framework instead of a MERN stack (MongoDB + Express)?
-* **Answer:** *"Food ordering systems handle financial transactions, inventory counts, and discount rules where relational data integrity (ACID) is paramount. Django's relational ORM with PostgreSQL or SQLite prevents data anomalies that can happen with schemaless databases. Furthermore, Django comes with battle-tested authentication, security against CSRF/SQLi, and an enterprise admin interface out of the box."*
-
-### Q2: How does the application handle duplicate orders if a user clicks checkout twice?
-* **Answer:** *"We use an **Idempotency Key pattern**. When the checkout process initiates, the frontend generates a unique UUID idempotency key attached to the request payload. The Django backend checks if an order with that key already exists within an atomic transaction. If it does, it simply returns the existing order rather than creating a duplicate database record or re-billing."*
-
-### Q3: How is pricing security maintained between frontend and backend?
-* **Answer:** *"We follow the zero-trust client model. The frontend never sends price calculations or discount amounts to the server. It only transmits product IDs and quantities. The Django `OrderListCreateView` queries the database for actual product prices, verifies active stock availability, validates coupon rules on the server, and computes taxes and totals before saving."*
-
-### Q4: How does the live delivery tracking work?
-* **Answer:** *"The delivery app provides a `/api/delivery/<order_number>/` endpoint that exposes the current stage (1 through 6), estimated delivery time, and the complete audit trail of status history logs. The React frontend modal uses lightweight interval polling to check this endpoint and updates the visual stepper whenever a new status transition is detected."*
-
-### Q5: How is payment verification handled for Razorpay?
-* **Answer:** *"Payment verification is two-phased: First, the backend creates an authorized order ID using Razorpay's API. Second, once the client completes checkout in the Razorpay checkout widget, it sends back `razorpay_order_id`, `razorpay_payment_id`, and `razorpay_signature`. The server uses HMAC-SHA256 with the secret key to independently hash the parameters and verify that the signature matches before marking the order as paid."*
+> *"To conclude: SmashCity is not just a digital menu. It is an end-to-end operational platform that harmonizes customer experience, kitchen workflow, and courier logistics through modern web standards, serverless cloud databases, and cryptographic security.*
+>
+> *Thank you very much for your time and attention. I am now ready to take any questions!"*
