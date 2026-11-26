@@ -20,6 +20,7 @@ import AuthModal from './components/AuthModal';
 import OrderTrackingModal from './components/OrderTrackingModal';
 import OrderHistoryModal from './components/OrderHistoryModal';
 import UserProfileModal from './components/UserProfileModal';
+import BurgerCustomizer from './components/BurgerCustomizer';
 
 function getInitialRoute() {
   if (typeof window !== 'undefined') {
@@ -32,6 +33,7 @@ function getInitialRoute() {
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState(getInitialRoute);
+  const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -60,9 +62,9 @@ function App() {
             <DeliveryPortal onNavigate={navigateTo} />
           ) : (
             <>
-              <Navbar onNavigate={navigateTo} />
+              <Navbar onNavigate={navigateTo} onOpenCustomizer={() => setIsCustomizerOpen(true)} />
               <main className="flex-grow">
-                <Hero />
+                <Hero onOpenCustomizer={() => setIsCustomizerOpen(true)} />
                 <BurgerShowcase />
                 <Hook />
                 <Menu />
@@ -79,6 +81,10 @@ function App() {
           <OrderTrackingModal />
           <OrderHistoryModal />
           <UserProfileModal />
+          <BurgerCustomizer 
+            isOpen={isCustomizerOpen} 
+            onClose={() => setIsCustomizerOpen(false)} 
+          />
         </div>
       </CartProvider>
     </AuthProvider>

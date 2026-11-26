@@ -1,8 +1,8 @@
 import React from 'react';
-import { Flame, ArrowRight } from 'lucide-react';
+import { Flame, ArrowRight, Sparkles } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
-const Hero = () => {
+const Hero = ({ onOpenCustomizer }) => {
   const { openCart } = useCart();
 
   return (
@@ -35,17 +35,24 @@ const Hero = () => {
             Welcome to Smash City. Crispy edges, juicy centers, and melted cheese on a toasted potato bun. The best burger in town, hot off the grill.
           </p>
           
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-sm mx-auto sm:max-w-none">
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-sm mx-auto sm:max-w-none">
+            <button 
+              onClick={onOpenCustomizer}
+              className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 sm:px-6 sm:py-3 bg-accent text-black text-xs sm:text-sm font-bold tracking-wider uppercase rounded hover:bg-amber-300 transition-all shadow-md cursor-pointer group"
+            >
+              <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+              Build Your Burger
+            </button>
             <a 
               href="#menu" 
-              className="inline-flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 bg-white text-black text-[16px] font-bold tracking-widest uppercase rounded hover:bg-gray-200 transition-colors shadow-lg"
+              className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 sm:px-6 sm:py-3 bg-white text-black text-xs sm:text-sm font-bold tracking-wider uppercase rounded hover:bg-gray-200 transition-colors shadow-md"
             >
               See the Menu
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-4 h-4" />
             </a>
             <button 
               onClick={openCart}
-              className="inline-flex items-center justify-center w-full sm:w-auto px-8 py-4 bg-transparent border-2 border-white text-white text-[16px] font-bold tracking-widest uppercase rounded hover:bg-white hover:text-black transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center w-full sm:w-auto px-5 py-2.5 sm:px-6 sm:py-3 bg-transparent border-2 border-white text-white text-xs sm:text-sm font-bold tracking-wider uppercase rounded hover:bg-white hover:text-black transition-colors cursor-pointer"
             >
               Get One Now
             </button>

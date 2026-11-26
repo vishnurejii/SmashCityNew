@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Clock, Menu as MenuIcon, X, ShoppingBag, User as UserIcon, LogOut, Package, MapPin, ShieldCheck, Bike } from 'lucide-react';
+import { Clock, Menu as MenuIcon, X, ShoppingBag, User as UserIcon, LogOut, Package, MapPin, ShieldCheck, Bike, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
-const Navbar = ({ onNavigate }) => {
+const Navbar = ({ onNavigate, onOpenCustomizer }) => {
   const { user, userRole, isAuthenticated, logout, openAuthModal, openProfileModal, openOrdersModal } = useAuth();
   const { itemCount, openCart } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -15,7 +15,7 @@ const Navbar = ({ onNavigate }) => {
   return (
     <header className="absolute top-0 w-full z-50">
       <div className="w-full px-8 md:px-16 h-24 flex items-center justify-between">
-        
+
         {/* Left: Timing */}
         <div className="hidden sm:flex items-start gap-3 mt-4">
           <Clock className="w-5 h-5 text-white mt-0.5" />
@@ -24,14 +24,21 @@ const Navbar = ({ onNavigate }) => {
             <span className="text-white/50 text-[10px] tracking-widest uppercase mt-0.5">Working Hours</span>
           </div>
         </div>
-        
+
         {/* Right Nav */}
         <div className="flex items-center gap-6 md:gap-8 mt-4">
           <nav className="hidden md:flex items-center gap-8 font-['Caveat'] text-3xl text-white">
+            <button
+              onClick={onOpenCustomizer}
+              className="text-accent hover:text-amber-300 transition-colors cursor-pointer flex items-center gap-1.5 font-['Caveat'] text-3xl"
+            >
+              <Sparkles className="w-5 h-5 text-accent animate-pulse" />
+              Build Your Burger
+            </button>
             <a href="#menu" className="hover:text-accent transition-colors">Our Menu</a>
             <a href="#contact" className="hover:text-accent transition-colors">Contact Us</a>
-            <button 
-              onClick={openCart} 
+            <button
+              onClick={openCart}
               className="hover:text-accent transition-colors cursor-pointer text-left font-['Caveat'] text-3xl"
             >
               Order Now
@@ -79,7 +86,7 @@ const Navbar = ({ onNavigate }) => {
                 </button>
 
                 {userDropdownOpen && (
-                  <div 
+                  <div
                     onClick={() => setUserDropdownOpen(false)}
                     className="absolute right-0 mt-2 w-52 bg-[#141414] border-2 border-border rounded-xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2"
                   >
@@ -144,9 +151,9 @@ const Navbar = ({ onNavigate }) => {
               </button>
             )}
           </div>
-          
+
           {/* Mobile Hamburger Toggle */}
-          <button 
+          <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="text-white hover:text-accent transition-colors md:hidden p-1"
             aria-label="Toggle navigation menu"
@@ -154,28 +161,28 @@ const Navbar = ({ onNavigate }) => {
             {mobileMenuOpen ? <X className="w-8 h-8" /> : <MenuIcon className="w-8 h-8" />}
           </button>
         </div>
-        
+
       </div>
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#0A0A0A]/95 border-b border-border backdrop-blur-md px-8 py-6 space-y-4">
           <nav className="flex flex-col gap-4 font-['Caveat'] text-3xl text-white">
-            <a 
-              href="#menu" 
+            <a
+              href="#menu"
               onClick={() => setMobileMenuOpen(false)}
               className="hover:text-accent transition-colors"
             >
               Our Menu
             </a>
-            <a 
-              href="#contact" 
+            <a
+              href="#contact"
               onClick={() => setMobileMenuOpen(false)}
               className="hover:text-accent transition-colors"
             >
               Contact Us
             </a>
-            <button 
+            <button
               onClick={() => {
                 setMobileMenuOpen(false);
                 openCart();
