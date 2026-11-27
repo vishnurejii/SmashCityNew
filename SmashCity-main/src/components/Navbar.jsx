@@ -36,6 +36,7 @@ const Navbar = ({ onNavigate, onOpenCustomizer }) => {
               Build Your Burger
             </button>
             <a href="#menu" className="hover:text-accent transition-colors">Our Menu</a>
+            <a href="#reviews" className="hover:text-accent transition-colors">Reviews</a>
             <a href="#contact" className="hover:text-accent transition-colors">Contact Us</a>
             <button
               onClick={openCart}

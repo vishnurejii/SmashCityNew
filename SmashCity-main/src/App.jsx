@@ -4,6 +4,7 @@ import Hero from './components/Hero';
 import BurgerShowcase from './components/BurgerShowcase';
 import Menu from './components/Menu';
 import Hook from './components/Hook';
+import Reviews from './components/Reviews';
 import Locations from './components/Locations';
 import Footer from './components/Footer';
 
@@ -68,6 +69,7 @@ function App() {
                 <BurgerShowcase />
                 <Hook />
                 <Menu />
+                <Reviews />
                 <Locations />
               </main>
               <Footer onNavigate={navigateTo} />

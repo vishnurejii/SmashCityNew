@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/orders/', include('orders.urls')),
     path('api/payments/', include('payments.urls')),
     path('api/delivery/', include('delivery.urls')),
+    path('api/reviews/', include('reviews.urls')),
 
     # Direct fallback endpoints (in case frontend calls without /api)
     path('auth/', include('accounts.urls')),
@@ -37,6 +38,7 @@ urlpatterns = [
     path('orders/', include('orders.urls')),
     path('payments/', include('payments.urls')),
     path('delivery/', include('delivery.urls')),
+    path('reviews/', include('reviews.urls')),
 ]
 
 if settings.DEBUG:
